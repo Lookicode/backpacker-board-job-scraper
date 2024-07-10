@@ -50,7 +50,7 @@ function readOffersAndReduce() {
 
 async function initializeScraper() {
   return await puppeteer.launch({
-    headless: true, // TODO: change to true when you're ready to deploy
+    headless: false, // TODO: change to true when you're ready to deploy
     defaultViewport: null,
   });
 }
@@ -88,7 +88,7 @@ function sendResultsAsDiscordMessage(found) {
   for (const row of found) {
     const payload = {
       content: /*row.text + " " + */ row.href,
-      username: "MyBot",
+      username: "Backpacker board job scraper",
     };
 
     fetch(webhookUrl, {
