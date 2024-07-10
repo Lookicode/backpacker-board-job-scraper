@@ -1,8 +1,4 @@
-const cron = require("node-cron");
 const puppeteer = require("puppeteer");
-
-// cron.schedule('0 18 * * *', function() {
-console.log("running a task every day at 18:00");
 
 function readOffersAndReduce() {
   const keywords = [
@@ -41,9 +37,7 @@ function readOffersAndReduce() {
         text.toLowerCase().includes(keyword.toLowerCase())
       )
     ) {
-      const url =
-        "https://www.backpackerboard.co.nz/work_jobs/" +
-        link
+      const url = "https://www.backpackerboard.co.nz/work_jobs/" + link;
       filteredData.push({
         href: url,
         text: text,
@@ -56,7 +50,7 @@ function readOffersAndReduce() {
 
 async function initializeScraper() {
   return await puppeteer.launch({
-    headless: false, // TODO: change to true when you're ready to deploy
+    headless: true, // TODO: change to true when you're ready to deploy
     defaultViewport: null,
   });
 }
@@ -75,7 +69,6 @@ async function findMaxPageNumber(browser) {
   const page = await openPage(browser, "job_listings.php");
 
   const numberOfPages = await page.evaluate(async () => {
-    // TODO async?
     const pageRegex = /Page \d+ of (\d+)/;
 
     const stringWithPages = document.querySelector("#paging p").innerText;
@@ -110,26 +103,21 @@ function sendResultsAsDiscordMessage(found) {
   }
 }
 
-// const getQuotes = async (maxPageNumber) => {
 async function getQuotes(browser, maxPageNumber, readOffersAndReduce) {
   let page;
 
   for (let i = 1; i <= maxPageNumber; i++) {
     page = await openPage(browser, "job_listings.php?page=" + i);
     const evaluation = await page.evaluate(readOffersAndReduce);
-    console.log(evaluation);
+    // console.log(evaluation);
 
-    const found = JSON.parse(evaluation);
-
-    // Display the selected offers
-    console.log(found);
-    return found;
+    return JSON.parse(evaluation);
   }
 }
 (async () => {
   const browser = await initializeScraper();
   const maxPageNumber = await findMaxPageNumber(browser);
-  console.log(maxPageNumber);
+  // console.log(maxPageNumber);
 
   const found = await getQuotes(browser, maxPageNumber, readOffersAndReduce);
   //sendResultsAsDiscordMessage(found);
